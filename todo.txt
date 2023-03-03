@@ -1,3 +1,10 @@
+1. Implement database "creation" (create a folder for the database)
+2. Implement table "creation" (create a file for the table)
+- Figure out how to store the table schema
+3. Implement database "use" (change the current database)
+4. Implement SELECT
+5. Implement ALTER
+
 Commands to support
 CREATE
 - DATABSE <database name>
@@ -12,19 +19,3 @@ SELECT
 ALTER
 - TABLE <table name> ADD <column name> <data type>
 .EXIT
-
-
-Take user input and parse it into tokens
-Check if the first token is a valid command
-If it is, check if the rest of the tokens are valid
-If they are, execute the command
-If not, print an error message
-If the first token is not a valid command, print an error message
-
-Most commands require valid tokens first before user-defined names
-SELECT will be a sloghtly special case
-
-Create a folder for CREATE DATABASE
-Create a file for CREATE TABLE
-
-Each line in a file will be 
