@@ -35,7 +35,7 @@ int useCheck = 0; // 0 means no database is in use, 1 means a database is in use
 
 void main(int argc, char *argv[]) {
     char line[MAX][ARG_MAX];
-    char *splitWords[ARG_MAX];
+    char *splitWords[ARG_MAX]; // Array of strings to hold the split words from the input string
     int iterator = 0;
     int tot = 0;
     if (argc > 2) printf("Usage: ./sql-sim <script-to-run>");
@@ -53,31 +53,25 @@ void main(int argc, char *argv[]) {
 
         for(iterator = 0; iterator < tot; ++iterator)
         {
-            //printf("%d. %s\n", iterator, line[iterator]);
             
             if((strstr(line[iterator], "-") == 0) && (strlen(line[iterator]) != 1)) {
                 
                 int len1 = strlen(line[iterator]);
-                //printf("Legnth: %d\n", len1);
-                //int len2 = strlen(line[iterator][len1-1]);
                 line[iterator][len1-1] = '\0';
                 parseInput(line[iterator], splitWords);
                 
                 identifyCommand(splitWords[0], splitWords);
             }
             else {
-                //printf("Failure\n");
+                /// Do nothing in this case
             }
             
         }
-        //for(int i = 0; i < iterator; i++) {
-        //    identifyCommand(line[i], line);
-        //}
     }
     else printf("Running in interactive mode\n");
 
     char commandInputString[MAX]; // String to hold the input from the user
-    //char *splitWords[ARG_MAX]; // Array of strings to hold the split words from the input string
+    //char *splitWords[ARG_MAX]; 
     int status = 1; // 0 means success, 1 means failure
 
     do{
@@ -85,11 +79,7 @@ void main(int argc, char *argv[]) {
         printf("sqlite> ");
         fgets(commandInputString, MAX, stdin);
         parseInput(commandInputString, splitWords);
-        //list the tokens
-        //for(int i = 0; i < ARG_MAX; i++) {
-        //    if(splitWords[i] != NULL) printf("%s\n", splitWords[i]);
-        //    else break;
-        //}
+
         status = identifyCommand(splitWords[0], splitWords);
         // While I'm going to track the status, I plan to have the functions print their own error messages. Maybe this'll be useful later.
     }while(1);
@@ -128,23 +118,16 @@ int identifyCommand(char *command, char *splitWords[]){
     //char temp[lastTokenLength-1];
     if(splitWords[tokenCount-1][lastTokenLength-1] == ';') {
         removeChar(splitWords[tokenCount-1], ';');
-        //for(int i = 0; i < lastTokenLength-1; i++) { // Copy the last token into a new string, minus the semicolon
-        //temp[i] = splitWords[tokenCount-1][i]; 
-        //}
-        //strcpy(splitWords[tokenCount-1], temp);
     }
     else { // If there is no semicolon, print an error and return.
         //printf("!Error: Semicolon Missing\n");
         //return 1;
+        //There was semicolon checking at one point during development but I removed when finally implemnting script support. It should technically work now after everything I did but I'm not risking it.
     }
-    //memset(temp,0,strlen(temp)); // Clear the temp string
-    //printf("tokenCount: %d\n", tokenCount);
-    //printf("lastTokenLength: %d\n", lastTokenLength);
     
 
     if (strcmp(command, "CREATE") == 0) {
         int parameterCount = tokenCount-3;
-        //printf("(identifyCommand) parameterCount: %d\n", parameterCount);
         status = createCommand(splitWords, parameterCount);
     }
     else if (strcmp(command, "DROP") == 0) {
@@ -168,19 +151,7 @@ int identifyCommand(char *command, char *splitWords[]){
 
 int createCommand(char *splitWords[], int parameterCount) {
     int status = 1;
-        //printf("From createCommand: \n");
-        // list the tokens
-        //for(int i = 0; i < ARG_MAX; i++) {
-        //    if(splitWords[i] != NULL) printf("%s\n", splitWords[i]);
-        //    else break;
-        //}
-        //printf("%s\n", splitWords[0]);
-        //printf("%s\n", splitWords[1]);
-        //printf("%s\n", splitWords[2]);
-        //printf("%s\n", splitWords[3]);
-        //printf("%s\n", splitWords[4]);
-        //printf("%s\n", splitWords[5]);
-        //printf("%s\n", splitWords[6]);
+
     if (strcmp(splitWords[1], "DATABASE") == 0) {
         status = createDirectory(splitWords[2]);
         if(status == 0) printf("Database %s created.\n", splitWords[2]);
@@ -254,34 +225,22 @@ int selectCommand(char *splitWords[]){
         while ((read = getline(&line, &len, fptr)) != -1) {
             if(iterator == 0) {
                 strcpy(attribute1, line);
-                //printf("attribute1: %s\n", attribute1);
             }
             else if(iterator == 1) {
                 strcpy(attribute2, line);
-                //printf("attribute2: %s\n", attribute2);
             }
             else if(iterator == 2) {
                 strcpy(attribute3, line);
-                //printf("attribute3: %s\n", attribute3);
             }
-            //else if(iterator > 1
-            //printf("Retrieved line of length %zu:\n", read);
-            //printf("line: %s\n", line);
-            //printf("iterator: %d\n", iterator);
-            //buffer[iterator] = line;
             iterator++;
             
         }
         fclose(fptr);
-        //printf("Print buffer: \n");
-        //printf("%s\n", buffer[0]);
-        //printf("%s\n", buffer[1]);
-        //printf("Print attributes: \n");
+
         removeChar(attribute1, ',');
         removeChar(attribute2, ',');
         attribute1[strcspn(attribute1, "\n")] = 0;
         attribute2[strcspn(attribute2, "\n")] = 0;
-        
         
         if(iterator == 3) {
             removeChar(attribute3, ',');
@@ -294,10 +253,6 @@ int selectCommand(char *splitWords[]){
             printf("%s | ", attribute1);
             printf("%s\n", attribute2);
         }
-        //for(int i = 0; i < iterator; i++) {
-        //    printf("i: %d\n", i);
-        //    printf("%s", buffer[i]);
-        //}
     }
     else {
         printf("Functionality not yet implemented.\n");
@@ -335,32 +290,26 @@ int createTable(char* tableName, char* splitWords[], int parameterCount) {
     strcat(filePath, tableName);
 
     if (access(filePath, F_OK) == 0) {
-        //printf("File already exists\n");
         printf("!Failed to create table %s because it already exists.\n", tableName);
         return 1;
     } else {
         FILE *fptr;
         fptr = fopen(filePath, "w");
         cleanTableParameters(splitWords, tableParameters, parameterCount);
-        //printf("From createTable, printing tableParameters:\n");
         for(int i = 0; i < parameterCount; i++) {
-            //printf("%s\n", tableParameters[i]);
             fputs(tableParameters[i], fptr);
-            //fputs(" ", fptr);
             if(i % 2 == 1) {
                 if(i == parameterCount-1) fputs(",", fptr);
                 else fputs(",\n", fptr);
             }
             else fputs(" ", fptr);
         }
-        //fputs("Hello World", fptr);
         fclose(fptr);
-        //printf("Creating table %s\n", tableName);
         printf("Table %s created.\n", tableName);
         
         return 0;
     }
-    //cleanTableParameters(splitWords, *tableParameters, parameterCount);
+
 }
 
 int deleteTable(const char* tableName){
