@@ -1,3 +1,7 @@
+// Author: Alexander Perez-Herrera
+// Date: 03/5/23
+// Name: sql-sim.c
+// Purpose: Simulate an enviroment like the sqlite3 command line interface. (With limited functionality.)
 #include <stdio.h> 
 #include <string.h> 
 #include <stdlib.h> 
@@ -8,9 +12,7 @@
 #include <errno.h> 
 #include <sys/stat.h>
 
-#define MAX 200 // An input longer than this will result in an error.
-#define ARG_MAX 100 // Max number of tokens in an input. Both of these values were chosen arbitrarily.
-
+// Function Prototypes below, comments for each function are above the function definition.
 // Input parsing functions
 void parseInput(char *input, char *splitWords[]);
 int identifyCommand(char *command, char *splitWords[]); // A little confusingly, this is to identify commands, not for a command called "identify".
@@ -24,15 +26,16 @@ int alterCommand(char *splitWords[]);
 int createDirectory(const char* directoryName);
 int createTable(char* tableName, char* splitWords[], int parameterCount);
 int deleteTable(const char* tableName);
-
 void cleanTableParameters(char *splitWords[], char *tableParameters[], int parameterCount);
 void removeChar(char *str, char garbage);
-
 int checkUse();
 
 char workingPath[100]; // Stores the path to the current working directory (database).
 int useCheck = 0; // 0 means no database is in use, 1 means a database is in use.
+#define MAX 200 // An input longer than this will result in an error.
+#define ARG_MAX 100 // Max number of tokens in an input. Both of these values were chosen arbitrarily.
 
+// Responsible for user input in a script move (file name as argument) or in interactive mode (no arguments).
 void main(int argc, char *argv[]) {
     char line[MAX][ARG_MAX];
     char *splitWords[ARG_MAX]; // Array of strings to hold the split words from the input string
@@ -85,6 +88,7 @@ void main(int argc, char *argv[]) {
     }while(1);
 }
 
+// Takes a string and splits it into tokens. The tokens are stored in the splitWords array.
 void parseInput(char *input, char *splitWords[]){
     int wordInd = 0;
     splitWords[0] = strtok(input, " \n");
@@ -94,6 +98,7 @@ void parseInput(char *input, char *splitWords[]){
     return;
 }
 
+// Takes the first token of the input and determines what command it is. Then it calls the appropriate function, passing along the rest of the tokens.
 int identifyCommand(char *command, char *splitWords[]){
     //printf("From identifyCommand\n");
         // list the tokens
@@ -149,6 +154,7 @@ int identifyCommand(char *command, char *splitWords[]){
     return status;
 }
 
+// Creates a database or table. Called whenever the user enters any CREATE command (table or database).
 int createCommand(char *splitWords[], int parameterCount) {
     int status = 1;
 
@@ -168,6 +174,7 @@ int createCommand(char *splitWords[], int parameterCount) {
     return 0;
 }
 
+// Drops a database or table. Called whenever the user enters any DROP command (table or database).
 int dropCommand(char *splitWords[]){
     int status = 1;
     if (strcmp(splitWords[1], "DATABASE") == 0) {
@@ -187,12 +194,16 @@ int dropCommand(char *splitWords[]){
     return 0;
 
 }
+
+// Selects a database. Called whenever the user enters the USE command.
 int useCommand(char *splitWords[]){
     int status = 1;
     useCheck = 1;
     strcpy(workingPath, splitWords[1]);
     printf("Using Database %s.\n", splitWords[1]);
 }
+
+// Displays the contents of a table. Called whenever the user enters the SELECT command.
 int selectCommand(char *splitWords[]){
     char filePath[100];
     char *buffer[10];
@@ -258,6 +269,8 @@ int selectCommand(char *splitWords[]){
         printf("Functionality not yet implemented.\n");
     }
 }
+
+// Modifies a table. Called whenever the user enters the ALTER command.
 int alterCommand(char *splitWords[]){
     char filePath[100];
     char buffer[] = "\n";
@@ -276,12 +289,14 @@ int alterCommand(char *splitWords[]){
     printf("Table %s modified.\n", splitWords[2]);
 }
 
+// Auxiliary function for createCommand. Creates a directory (folder).
 int createDirectory(const char* directoryName) {
     int check;
     check = mkdir(directoryName, 0777);
     return check;
 }
 
+// Auxiliary function for createCommand. Creates a table (text file in folder).
 int createTable(char* tableName, char* splitWords[], int parameterCount) {
     char filePath[100];
     char *tableParameters[parameterCount];
@@ -312,6 +327,8 @@ int createTable(char* tableName, char* splitWords[], int parameterCount) {
 
 }
 
+// Auxiliary function for dropCommand. Deletes a table (text file in folder).
+// There is no auxiliary function for deleting a directory because it was trivial (done in dropCommand itself instead)
 int deleteTable(const char* tableName){
     int status = 1;
     char filePath[100];
@@ -328,6 +345,7 @@ int deleteTable(const char* tableName){
     return status;
 }
 
+// Ensures that a database is selected before executing certain commands.
 int checkUse() {
     if(useCheck == 0) {
         printf("!Error: No database selected. Please use the USE command to select a database.\n");
@@ -336,6 +354,7 @@ int checkUse() {
     else return 0;
 }
 
+// Auxiliary function for createTable. Removes unnecessary characters from the table parameters. (Mostly to prepare them for writing into a file)
 void cleanTableParameters(char *splitWords[], char *tableParameters[], int parameterCount) {
     // Copy splitWords into tableParameters
     for(int i = 0; i < parameterCount; i++) {
@@ -357,6 +376,7 @@ void cleanTableParameters(char *splitWords[], char *tableParameters[], int param
     }
 }
 
+// Auxiliary function that removes a specified character from a string.
 void removeChar(char *str, char garbage) {
 
     char *src, *dst;
