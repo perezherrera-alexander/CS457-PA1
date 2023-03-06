@@ -40,7 +40,7 @@ void main(int argc, char *argv[]) {
     int tot = 0;
     if (argc > 2) printf("Usage: ./sql-sim <script-to-run>");
     else if (argc == 2) {
-        printf("Running script %s\n", argv[1]);
+        printf("Running script %s:\n\n", argv[1]);
         FILE *fptr;
         fptr = fopen(argv[1], "r");
 
