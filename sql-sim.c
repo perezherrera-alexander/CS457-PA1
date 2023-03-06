@@ -61,13 +61,6 @@ void main(int argc, char *argv[]) {
                 //printf("Legnth: %d\n", len1);
                 //int len2 = strlen(line[iterator][len1-1]);
                 line[iterator][len1-1] = '\0';
-                //int len2 = strlen(line[iterator]);
-                //printf("Legnth: %d\n", len2);
-                //if( line[iterator][len1-1] = '\0' ) printf("TRUE\n");
-                //else printf("FALSE\n");
-                //printf("Success\n");
-                //printf("newline removed\n");
-                //printf(" %s\n", line[iterator]);
                 parseInput(line[iterator], splitWords);
                 
                 identifyCommand(splitWords[0], splitWords);
